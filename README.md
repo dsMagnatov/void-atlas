@@ -1,98 +1,79 @@
-# vinext-starter
+# VOID ATLAS
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+An immersive, scroll-driven deep-space website. A video-backed 3D tunnel opens
+into a moving star field with layered typography and a final contact form.
 
-## Prerequisites
+Built with React, TypeScript, Vinext/Vite, Three.js and GSAP ScrollTrigger.
+Typography uses Instrument Serif and Manrope.
 
-- Node.js `>=22.13.0`
+## Run locally
 
-## Quick Start
+Install Node.js **22.13 or newer** and **pnpm 11**. If pnpm is not installed:
 
-```bash
-npm install
-npm run dev
-npm run build
+```sh
+npm install --global pnpm@11.19.0
 ```
 
-This starter does not use `wrangler.jsonc`.
+Clone the repository and start the site:
 
-## Included Shape
-
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```sh
+git clone https://github.com/dsMagnatov/void-atlas.git
+cd void-atlas
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+Open the Local URL printed in the terminal, normally **http://localhost:3000/**.
+Keep the terminal running while viewing the site; press Ctrl+C to stop it.
+If port 3000 is occupied, use the address printed by the server.
+Private repositories require GitHub access before cloning.
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+No `.env` file, API key, Cloudflare account or database is required for local use.
+The tunnel video is included in `public/`; fonts load from Google Fonts and need
+an internet connection (system serif/sans-serif fallbacks are provided).
+Use a browser with WebGL and hardware acceleration for the full experience.
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+## Commands
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+| Command | Purpose |
+| --- | --- |
+| `pnpm dev` | Start the local development server with live updates |
+| `pnpm build` | Produce the production build in `dist/` |
+| `pnpm start` | Preview the production build after building |
+| `pnpm test` | Build and run the server-rendered page/asset smoke tests |
+| `pnpm lint` | Run ESLint |
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+Use pnpm and the committed `pnpm-lock.yaml` to keep dependency versions consistent.
+The build permissions for the native dependencies are already configured in
+`pnpm-workspace.yaml`.
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+## Where to edit
 
-## Useful Commands
+| File | Contents |
+| --- | --- |
+| `app/page.tsx` | Page composition and the active tunnel video URL |
+| `app/layout.tsx` | Page title, description and document layout |
+| `app/globals.css` | Layout, typography, responsive rules and visual effects |
+| `app/components/TunnelExperience.tsx` | First screen, video texture, tunnel, stars and scroll animation |
+| `app/components/tunnelShaders.ts` | GLSL shaders for the video, tunnel and stars |
+| `app/components/CosmicTypographyField.tsx` | Floating phrases, positions, animation timings and contact form |
+| `public/tunnel-source.mp4` | Active tunnel video |
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+The `spatialTexts` array in `CosmicTypographyField.tsx` controls small phrases and
+their x/y/z positions and rotations. The GSAP timeline below it controls the
+sequence of the two large phrases and the final form.
 
-## Learn More
+## Handoff notes
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+- The contact form is currently a **frontend demo**. Submitting it changes the
+  button to `SIGNAL RECEIVED`; it does not send email, call an API or save data.
+  Connect a backend or email service before using it to collect real messages.
+- Navigation links currently point to the introductory `#experience` section.
+- The project retains its original Cloudflare/Sites build configuration in
+  `vite.config.ts`, `build/`, `worker/` and `.openai/hosting.json`. The hosting
+  project identifier belongs to the original setup. A recipient should configure
+  their own deployment target; pushing to GitHub does not deploy the site.
+- `public/tunnel-source.png` and `public/vpn-background.mp4` are retained source
+  assets from earlier versions. The current page uses `tunnel-source.mp4`.
+- Dependencies, local environment files, caches and build output are excluded
+  from Git. Recreate dependencies with `pnpm install --frozen-lockfile`.

@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VPN Service",
-  description: "Secure VPN service.",
+  title: "Void Atlas — Navigate Deep Space",
+  description:
+    "Void Atlas transforms distant light into explorable deep-space landscapes.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
@@ -16,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uk">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );
